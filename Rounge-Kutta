@@ -44,7 +44,11 @@ def on_calcular_button(widget, expressao_input, y0_input, x0_input, h_input, nfi
     valores_y_str = ', '.join(map(str, valores_y))
 
     # Exibindo os resultados na interface gráfica
+    valores_x_str = ", ".join([f"{x_val:.4f}" for x_val in valores_x])
+    valores_y_str = ", ".join([f"{y_val:.4f}" for y_val in valores_y])
+
     resultado_label.text = f"Valores de x: {valores_x_str}\nValores de y: {valores_y_str}"
+
 
 def build(app):
     expressao_label = toga.Label("Digite a expressão:", style=Pack(padding=5))
