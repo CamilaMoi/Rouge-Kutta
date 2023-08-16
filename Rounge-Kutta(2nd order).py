@@ -9,38 +9,44 @@ y = sp.Function('y')(x)
 z = sp.Function('z')(x)
 
 def f(x_val, y_val, z_val):
-    return y_val, x_val
+    return y_val, z_val
 
 def g(x_val, y_val, z_val, expressao):
-    edo_reduzida = expressao.subs({y: y_val, x: x_val, y.diff(x): z, y.diff(x, x): z.diff(x)})
+    edo_reduzida = expressao.subs({x: x_val, y.diff(x): z, y.diff(x, x): z.diff(x)})
     return edo_reduzida
 
 def runge_kutta(x0, y0, z0, h, nfinal, expressao):
-    print(f"x0: {x0}, y0: {y0}, h: {h}, nfinal: {nfinal}")
     valores_x = [x0] * (nfinal + 1)
     valores_y = [y0] * (nfinal + 1)
     valores_z = [z0] * (nfinal + 1)
+
+
     for i in range(1, nfinal + 1):
         x_val = valores_x[i - 1]
         y_val = valores_y[i - 1]
         z_val = valores_z[i - 1]
 
 
-        x0=x0+h
-        k1y = h * f(x_val, y_val, z_val)[1]
-        k2y = h * f(x_val + h / 2, y_val + k1y / 2, z_val + k1y / 2)[1]
-        k3y = h * f(x_val + h / 2, y_val + k2y / 2, z_val + k2y / 2)[1]
-        k4y = h * f(x_val + h, y_val + k3y, z_val + k3y)[1]
+        k1y = h * f(x_val, y_val, z_val)[0]
+        k1z = h * f(x_val, y_val, z_val)[1]
+        
 
-        k1z = h * g(x0, z_val,y_val, expressao)
-        k2z = h * g(x0 + h / 2, z_val + k1z / 2, y_val + k1y / 2, expressao)
-        k3z = h * g(x0 + h / 2, z_val + k2z / 2, y_val + k1y / 2, expressao)
-        k4z = h * g(x0 + h, z_val + k3z, y_val + k1y / 2, expressao)
+        k2y = h * f(x_val + h / 2, y_val + k1y / 2, z_val + k1z / 2)[0]
+        k2z = h * f(x_val + h / 2, y_val + k1y / 2, z_val + k1z / 2)[1]
+        
 
-        valores_z[i] = z_val + (k1z + 2 * k2z + 2 * k3z + k4z) / 6
-        valores_y[i] = y_val + (k1y + 2 * k2y + 2 * k3y + k4y) / 6
-        valores_x[i] = x0
+        k3y = h * f(x_val + h / 2, y_val + k2y / 2, z_val + k2z / 2)[0]
+        k3z = h * f(x_val + h / 2, y_val + k2y / 2, z_val + k2z / 2)[1]
+        
 
+        k4y = h * f(x_val + h, y_val + k3y, z_val + k3z)[0]
+        k4z = h * f(x_val + h, y_val + k3y, z_val + k3z)[1]
+        
+
+        valores_x[i] = x_val + h
+        valores_y[i] = y_val + (k1y + 2*k2y + 2*k3y + k4y) / 6
+        valores_z[i] = z_val + (k1z + 2*k2z + 2*k3z + k4z) / 6
+        
 
     return valores_x, valores_y, valores_z
 
@@ -59,7 +65,6 @@ def on_calcular_button(widget, x0_input, y0_input, z0_input, h_input, nfinal_inp
     for i in range(nfinal + 1):
         resultado_text += f"x = {valores_x[i]:.1f}, y = {valores_y[i]:.3f}, z = {valores_z[i]:.3f}\n"
     resultado_label.text = resultado_text
-
 
 def build(app):
     x0_label = toga.Label("x0:", style=Pack(padding=5))
@@ -85,7 +90,7 @@ def build(app):
                                                                              h_input, nfinal_input, expressao_input,
                                                                              resultado_label), style=Pack(padding=5))
 
-    resultado_label = toga.Label("", style=Pack(padding=5))
+    resultado_label= toga.Label("", style=Pack(padding=5))
 
     box = toga.Box(
         children=[
@@ -109,4 +114,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
